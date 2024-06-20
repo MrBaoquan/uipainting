@@ -2,7 +2,7 @@
   "name": "com.parful.uipainting",
   "version": "1.0.0",
   "displayName": "UI Painting",
-  "description": "A package for painting UI elements in Unity",
+  "description": "基于UGUI下RawImage的笔刷工具",
   "unity": "2021.1",
   "documentationUrl": "https://example.com/",
   "changelogUrl": "https://example.com/changelog.html",
