@@ -9,7 +9,8 @@ public class Painting : MonoBehaviour
     public Material mat; //给定的shader新建材质
     public Texture brushTypeTexture; //画笔纹理，半透明
     public RawImage raw; //使用UGUI的RawImage显示，方便进行添加UI,将pivot设为(0.5,0.5)
-    public Color brushColor = Color.black;
+    public Color brushColor = Color.white;
+    public Color backgroundColor = Color.black;
 
     [SerializeField]
     public float brushWidth = 0.5f; //关联粗细
@@ -166,7 +167,7 @@ public class Painting : MonoBehaviour
     {
         Graphics.SetRenderTarget(destTexture);
         GL.PushMatrix();
-        GL.Clear(true, true, Color.white);
+        GL.Clear(true, true, backgroundColor);
         GL.PopMatrix();
     }
 
