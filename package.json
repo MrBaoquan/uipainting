@@ -1,6 +1,6 @@
 {
   "name": "com.parful.uipainting",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "displayName": "UI Painting",
   "description": "基于UGUI下RawImage的笔刷工具",
   "unity": "2021.1",

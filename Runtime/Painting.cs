@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
-public class Painting : MonoBehaviour
+public class Painting : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerMoveHandler
 {
     private RenderTexture texRender; //画布
     public Material mat; //给定的shader新建材质
@@ -43,26 +45,31 @@ public class Painting : MonoBehaviour
         rawWidth = raw.rectTransform.rect.width;
         rawHeight = raw.rectTransform.rect.height;
 
-        //计算Canvas位置偏差
-        Canvas canvas = raw.canvas;
-        Vector2 canvasOffset =
-            RectTransformUtility.WorldToScreenPoint(Camera.main, canvas.transform.position)
-            - canvas.GetComponent<RectTransform>().sizeDelta / 2;
+        texRender = new RenderTexture(
+            (int)rawWidth,
+            (int)rawHeight,
+            24,
+            RenderTextureFormat.ARGB32
+        );
+        Clear(texRender);
 
         //最终鼠标相对画布的位置
-        rawMousePosition =
-            canvasOffset
-            + (
-                new Vector2(raw.transform.position.x, raw.transform.position.y)
-                - raw.rectTransform.sizeDelta / 2
-            );
+        rawMousePosition = (
+            new Vector2(raw.transform.position.x, raw.transform.position.y)
+            - raw.rectTransform.rect.size / 2
+        );
     }
 
     void Start()
     {
+        StartCoroutine(WaitForNextFrame());
+    }
+
+    IEnumerator WaitForNextFrame()
+    {
+        yield return new WaitForEndOfFrame();
+
         RecaculateOffset();
-        texRender = new RenderTexture(Screen.width, Screen.height, 24, RenderTextureFormat.ARGB32);
-        Clear(texRender);
     }
 
     Vector3 startPosition = Vector3.zero;
@@ -72,18 +79,18 @@ public class Painting : MonoBehaviour
     {
         if (!EnableCustomInput)
         {
-            if (Input.GetMouseButtonDown(0))
-            {
-                OnPenDown();
-            }
-            if (Input.GetMouseButton(0))
-            {
-                OnPenMove(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0));
-            }
-            if (Input.GetMouseButtonUp(0))
-            {
-                OnPenUp();
-            }
+            // if (Input.GetMouseButtonDown(0))
+            // {
+            //     OnPenDown();
+            // }
+            // if (Input.GetMouseButton(0))
+            // {
+            //     OnPenMove(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0));
+            // }
+            // if (Input.GetMouseButtonUp(0))
+            // {
+            //     OnPenUp();
+            // }
         }
 
         if (Input.GetKeyDown(KeyCode.R))
@@ -240,10 +247,16 @@ public class Painting : MonoBehaviour
         raw.texture = texRender;
     }
 
+    public bool IsEmpty()
+    {
+        return savedList.Count == 0;
+    }
+
     public void ClearPaint()
     {
         Clear(texRender);
         savedList.Clear();
+        OnPenUp();
     }
 
     //二阶贝塞尔曲线 效果不好，改用下面三阶
@@ -355,5 +368,31 @@ public class Painting : MonoBehaviour
                 brushScale
             );
         }
+    }
+
+    bool isDown = false;
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if (EnableCustomInput)
+            return;
+        isDown = true;
+        OnPenDown();
+    }
+
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        if (!isDown || EnableCustomInput)
+            return;
+        isDown = false;
+        OnPenUp();
+    }
+
+    public void OnPointerMove(PointerEventData eventData)
+    {
+        if (!isDown || EnableCustomInput)
+            return;
+
+        OnPenMove(eventData.position);
     }
 }
